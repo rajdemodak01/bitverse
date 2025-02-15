@@ -62,11 +62,15 @@ const Profile = () => {
   });
   useEffect(() => {
     if (!user) return;
+    const API_URL = import.meta.env.VITE_API_URL;
+
+
+
 
     const fetchProfile = async () => {
       try {
         console.log(`${clerkUserId}`)
-        const response = await axios.get(`/api/profile/${clerkUserId}`, {
+        const response = await axios.get(`${API_URL}/api/profile/${clerkUserId}`, {
           withCredentials: true,
         });
 
