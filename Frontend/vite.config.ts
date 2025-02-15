@@ -13,12 +13,19 @@ export default defineConfig({
   server: {
     open: true,
     cors: true,
+    // proxy: {
+    //   '/leetcode': {
+    //     target: 'https://leetcode.com/graphql',
+    //     changeOrigin: true,
+    //     secure: false,
+    //     rewrite: (path) => path.replace(/^\/leetcode/, '')
+    //   },
+    // },
     proxy: {
-      '/leetcode': {
-        target: 'https://leetcode.com/graphql',
+      '/api': {
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/leetcode/, '')
       },
     },
   },

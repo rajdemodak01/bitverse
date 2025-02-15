@@ -12,6 +12,7 @@ import { connectDB } from "./db/connectDb.js";
 import bodyParser from 'body-parser';
 import { handleWebhook } from "./controllers/webhook.js";
 import ChatMessage from "./models/ChatMessage.js";
+import { User } from "./models/User.js";
 
 // Configuration
 export const envMode = process.env.NODE_ENV?.trim() || "DEVELOPMENT";
@@ -29,19 +30,25 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     credentials: true,
-    origin: "https://career-quest-nu.vercel.app",  // Adjust according to your frontend URL
+    // origin: "https://career-quest-nu.vercel.app",  // Adjust according to your frontend URL
+    origin: "https://bitverse-eight.vercel.app/",  // Adjust according to your frontend URL
     methods: ["GET", "POST"]
   }
 });
 
 // Middleware setup
-// app.use(express.json());
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({
-  origin: "https://career-quest-nu.vercel.app", // Replace with your frontend URL
-  credentials: true
-}));
+// app.use(cors({
+//   origin: "https://bitverse-eight.vercel.app/", // Replace with your frontend URL
+//   credentials: true
+// }));
+// app.use(cors({
+//   origin: "*", // Allow all origins
+//   credentials: true,
+// }));
+app.use(cors())
 
 app.use(morgan("dev")); // Uncomment if you want logging
 
@@ -53,7 +60,71 @@ app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 
-// Catch-all route for 404
+
+app.post("/api/profile", async (req, res) => {
+  console.log("profile called")
+  try {
+    const { clerkUserId, email } = req.body;
+
+    // Validate required fields
+    if (!clerkUserId || !email) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }else{
+      console.log("here")
+    }
+
+    // Check if the user already exists
+    let user = await User.findOne({ clerkUserId });
+
+    if (user) {
+      // Update the existing user profile
+      user.set(req.body);
+      await user.save();
+      console.log("one user found")
+      return res.status(200).json({ message: "Profile updated successfully", user });
+    }
+
+    // Create a new user profile
+    user = new User(req.body);
+    await user.save();
+    res.status(201).json({ message: "Profile created successfully", user });
+    console.log("profile created successfully");
+
+
+  } catch (error) {
+    console.log(error)
+    console.error("Error handling profile:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/api/profile/:clerkUserId", async (req, res) => {
+  console.log("🚀 Route hit: GET /api/profile/:clerkUserId");
+  console.log("🔍 Request Params:", req.params);
+
+  try {
+    const { clerkUserId } = req.params;
+    
+    if (!clerkUserId) {
+      return res.status(400).json({ error: "Missing clerkUserId" });
+    }
+    
+    const user = await User.findOne({ clerkUserId });
+    console.log("🔍 User found:", user);
+    
+    if (!user) {
+      
+      console.log(`📌 Extracted clerkUserId: ${clerkUserId}`);
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error("❌ Error fetching profile:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.get("*", (req, res) => {
   if (req.path.startsWith('/socket.io')) return;
   res.status(404).json({

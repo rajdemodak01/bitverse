@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import TextInput from "./componentsForprofile/TextInput";
 import SelectInput from "./componentsForprofile/SelectInput";
 import Button from "./componentsForprofile/Button";
+import axios from "axios";
+import { useUser } from "@clerk/clerk-react";
+import io from 'socket.io-client';
+const socket = io(import.meta.env.VITE_BACKEND_URL, {
+  transports: ['websocket', 'polling'],
+  withCredentials: true,
+});
+
+
 interface ProfileData {
   name: string;
   dob: string;
@@ -18,7 +27,7 @@ interface ProfileData {
   aspiration: string;
   hobbies: string;
   strength: string;
-  weekness: string;
+  weakness: string;  // Fixed typo from 'weekness' to 'weakness'
   socialMedia: string;
   movie: string;
   book: string;
@@ -27,7 +36,12 @@ interface ProfileData {
 }
 
 const Profile = () => {
+  const { user } = useUser();
+  const clerkUserId = user?.id; // This is the Clerk User ID
   const [formStep, setFormStep] = useState(1);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [profileExists, setProfileExists] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [profileData, setProfileData] = useState<ProfileData>({
     name: "",
@@ -44,16 +58,45 @@ const Profile = () => {
     aspiration: "",
     hobbies: "",
     strength: "",
-    weekness: "",
+    weakness: "", // Fixed typo
     socialMedia: "",
     movie: "",
     book: "",
     higherEducation: "",
     referrenceCounsellor: "",
   });
-  const [touched, setTouched] = useState<Partial<Record<keyof ProfileData, boolean>>>({});
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (!user) return;
 
+    const fetchProfile = async () => {
+      try {
+        console.log(`${clerkUserId}`)
+        const response = await axios.get(`/api/profile/${clerkUserId}`, {
+          withCredentials: true,
+        });
+
+        if (response.status === 200) {
+          setProfileData(response.data.user); // Store user data
+          setProfileExists(true);
+          // navigate("/dashboard"); // Redirect user if profile exists
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          console.log("User profile not found, allow submission.");
+          setProfileExists(false);
+        } else {
+          console.error("Error fetching profile:", error);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user, navigate]);
+
+  const [touched, setTouched] = useState<Partial<Record<keyof ProfileData, boolean>>>({});
+  
   const handleProfileChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -66,7 +109,7 @@ const Profile = () => {
       ...touched,
       [name]: true,
     });
-
+    
     setErrors({
       ...errors, 
       [name]:''
@@ -89,7 +132,7 @@ const Profile = () => {
       if (!profileData.favouriteSubject) newErrors.favouriteSubject = 'Favouritte Subject Name is required';
       // if (!profileData.nonFavouriteSubject) newErrors.nonFavouriteSubject = 'Non Favourite Subject Name is required';
       // if (!profileData.achievements) newErrors.achievements = 'Achievements is required';
-       if (!profileData.aspiration) newErrors.aspiration = 'Aspiration is required';
+      if (!profileData.aspiration) newErrors.aspiration = 'Aspiration is required';
     }else if(formStep === 3){
       if (!profileData.hobbies) newErrors.hobbies = 'Hobbies/Interest name is required';
       // if (!profileData.strength) newErrors.strength = 'Strengths are required';
@@ -111,42 +154,89 @@ const Profile = () => {
     // setErrors(newErrors);
     setFormStep((prevStep) => prevStep - 1);
   };
-  const handleSubmit = () => {
-    if (validateForm()) {
-      navigate("/");
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    if (!user) {
+      console.error("User not authenticated");
+      return;
+    }
+    
+    const updatedProfileData = {
+      ...profileData,
+      clerkUserId: user.id,
+      email: user.primaryEmailAddress?.emailAddress,
+    };
+    
+    console.log("Sending data:", updatedProfileData); // Log the data being sent
+    console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL); // Log the backend URL
+    
+    try {
+      const response = await axios.post('/api/profile', updatedProfileData, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+      
+      console.log("Profile saved:", response.data);
+      // console.log("Emitting profile data to chatbot:", response.data.user);
+      navigate('/')
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
+          console.error("Response headers:", error.response.headers);
+        } else if (error.request) {
+          console.error("No response received:", error.request);
+        } else {
+          console.error("Error:", error.message);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
     }
   };
   
+  
   useEffect(() => {
-      const newErrors: Record<string, string> = {};
-      if(formStep===1){
-        if (touched.name && !profileData.name.trim()) newErrors.name = 'Full name is required';
-        if (touched.dob && !profileData.dob.trim()) newErrors.dob = 'Date of birth is required';
-        if (touched.gender && !profileData.gender.trim()) newErrors.gender = 'Gender is required';
-        if (touched.location && !profileData.location) newErrors.location = 'Location is required';
-        if (touched.mobileNumber && !profileData.mobileNumber) newErrors.mobileNumber = 'Mobile Number is required';
-      }else if(formStep===2){
-        if (touched.school && !profileData.school) newErrors.school = 'School name is required';
-        if (touched.study && !profileData.study) newErrors.study = 'Study Details is required';
-        if (touched.previousClassPercentage && !profileData.previousClassPercentage) newErrors.previousClassPercentage = 'Percentage is required';
-        if (touched.favouriteSubject &&  !profileData.favouriteSubject) newErrors.favouriteSubject = 'Favouritte Subject Name is required';
-        // if (touched.nonFavouriteSubject && !profileData.nonFavouriteSubject) newErrors.nonFavouriteSubject = 'Non Favourite Subject Name is required';
-        // if (touched.achievements && !profileData.achievements) newErrors.achievements = 'Achievements is required';
-        if (touched.aspiration && !profileData.aspiration) newErrors.aspiration = 'Aspiration is required';
-      }else if(formStep ===3){
-        if (touched.hobbies && !profileData.hobbies) newErrors.hobbies = 'Hobbies/Interest name is required';
-        // if (touched.strength  && !profileData.strength) newErrors.strength = 'Strengths are required';
-        // if (touched.weekness && !profileData.weekness) newErrors.weekness = 'Weekness is required';
-      }else if(formStep===4){
-        if(touched.higherEducation && !profileData.higherEducation) newErrors.higherEducation = 'Higher Education Data is Required';
-      }
-      // setErrors(newErrors);
-      setErrors({
-        ...errors, 
-        ...newErrors
-      })
-    }, [profileData, touched]);
-    return (
+    const newErrors: Record<string, string> = {};
+    if(formStep===1){
+      if (touched.name && !profileData.name.trim()) newErrors.name = 'Full name is required';
+      if (touched.dob && !profileData.dob.trim()) newErrors.dob = 'Date of birth is required';
+      if (touched.gender && !profileData.gender.trim()) newErrors.gender = 'Gender is required';
+      if (touched.location && !profileData.location) newErrors.location = 'Location is required';
+      if (touched.mobileNumber && !profileData.mobileNumber) newErrors.mobileNumber = 'Mobile Number is required';
+    }else if(formStep===2){
+      if (touched.school && !profileData.school) newErrors.school = 'School name is required';
+      if (touched.study && !profileData.study) newErrors.study = 'Study Details is required';
+      if (touched.previousClassPercentage && !profileData.previousClassPercentage) newErrors.previousClassPercentage = 'Percentage is required';
+      if (touched.favouriteSubject &&  !profileData.favouriteSubject) newErrors.favouriteSubject = 'Favouritte Subject Name is required';
+      // if (touched.nonFavouriteSubject && !profileData.nonFavouriteSubject) newErrors.nonFavouriteSubject = 'Non Favourite Subject Name is required';
+      // if (touched.achievements && !profileData.achievements) newErrors.achievements = 'Achievements is required';
+      if (touched.aspiration && !profileData.aspiration) newErrors.aspiration = 'Aspiration is required';
+    }else if(formStep ===3){
+      if (touched.hobbies && !profileData.hobbies) newErrors.hobbies = 'Hobbies/Interest name is required';
+      // if (touched.strength  && !profileData.strength) newErrors.strength = 'Strengths are required';
+      // if (touched.weekness && !profileData.weekness) newErrors.weekness = 'Weekness is required';
+    }else if(formStep===4){
+      if(touched.higherEducation && !profileData.higherEducation) newErrors.higherEducation = 'Higher Education Data is Required';
+    }
+    // setErrors(newErrors);
+    setErrors({
+      ...errors, 
+      ...newErrors
+    })
+  }, [profileData, touched]);
+  // if (loading) return <p>Loading...</p>;
+  return (
+    <div>
+      {profileExists ? (
+        <p className="w-full h-screen flex items-center justify-center text-white text-2xl font-bold font-royal4 text-center">
+        You have already submitted your profile.
+      </p>
+      
+      ) : (
        <div className="w-full h-screen overflow-y-auto relative text-black lg:pr-[12rem] lg:pl-[24rem] pt-8  lg:block font-royal4">
 
         {/* Trying to do resonsive */}
@@ -161,11 +251,11 @@ const Profile = () => {
             <div
               className={`absolute rounded-full bg-BluePrimary h-1 top-0 transition-all bg-blue-600`}
               style={{ width: `${(formStep - 1) * 50 + 1}%` }}
-            ></div>
+              ></div>
             <div
               className={`rounded-full absolute h-8 w-8 -top-2.5 left-[-1%] flex justify-center items-center font-semibold transition-all bg-SmallHeading  ${
                 formStep >= 1
-                  ? "bg-blue-600 text-white"
+                ? "bg-blue-600 text-white"
                   : "bg-gray-400 text-[#636363]"
               }`}
             >
@@ -322,10 +412,10 @@ const Profile = () => {
                   { value: "<8", label: "8th or Below" },
                   { value: "9-10", label: "9th or 10th" },
                   { value: "11-12", label: "11th or 12th" },
-                  { value: "ug", label: "Undergraduate" },
-                  { value: "g", label: "Graduate" },
-                  { value: "p", label: "Professional" },
-                  { value: "other", label: "Other" },
+                  // { value: "ug", label: "Undergraduate" },
+                  // { value: "g", label: "Graduate" },
+                  // { value: "p", label: "Professional" },
+                  // { value: "other", label: "Other" },
                 ]}
               />
 
@@ -430,7 +520,7 @@ const Profile = () => {
     <TextInput
           id="weekness"
           name="weekness"
-          value={profileData.weekness}
+          value={profileData.weakness}
           label="Weaknesses"
           placeholder="Weaknesses"
           onChange={handleProfileChange}
@@ -533,11 +623,14 @@ const Profile = () => {
   </div>
     <div className="w-full flex flex-row justify-between items-end">
       <Button onClick={handlePrev} label="Previous" />
-      <Button onClick={handleSubmit} label="Submit" />
+      <Button onClick={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)} label="Submit" />
     </div>
   </>
 )}
       </div>
+    </div>
+        
+      )}
     </div>
   );
 };
