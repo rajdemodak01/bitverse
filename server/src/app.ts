@@ -13,6 +13,8 @@ import bodyParser from 'body-parser';
 import { handleWebhook } from "./controllers/webhook.js";
 import ChatMessage from "./models/ChatMessage.js";
 import { User } from "./models/User.js";
+import Mentor from "./models/Mentor.js";
+import Booking from "./models/Booking.js";
 
 // Configuration
 export const envMode = process.env.NODE_ENV?.trim() || "DEVELOPMENT";
@@ -123,6 +125,47 @@ app.get("/api/profile/:clerkUserId", async (req, res) => {
     console.error("❌ Error fetching profile:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+app.get("/api/mentors", async (_req, res) => {
+  const mentors = await Mentor.find();
+  res.json(mentors);
+});
+app.post("/api/mentors", async (req, res) => {
+  try {
+    const { name, profileUrl, about } = req.body;
+
+    if (!name || !profileUrl || !about) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const newMentor = new Mentor({ name, profileUrl, about });
+    await newMentor.save();
+
+    res.status(201).json({ message: "Mentor added successfully", mentor: newMentor });
+  } catch (error) {
+    console.error("Error adding mentor:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+// Book a mentor
+app.post("/api/book", async (req, res) => {
+  const { userId, mentorId, date, time } = req.body;
+  if (!userId || !mentorId || !date || !time) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const newBooking = new Booking({ userId, mentorId, date, time });
+  await newBooking.save();
+  res.json({ message: "Booking successful!" });
+});
+
+// Get user bookings
+app.get("/api/bookings/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const bookings = await Booking.find({ userId }).populate("mentorId");
+  res.json(bookings);
 });
 
 app.get("*", (req, res) => {

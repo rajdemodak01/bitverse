@@ -1,6 +1,6 @@
 import { VerticalTimeline, VerticalTimelineElement } from "react-vertical-timeline-component";
 import "react-vertical-timeline-component/style.min.css";
-import { FaGraduationCap, FaBook, FaPencilAlt, FaSchool, FaBriefcase, FaChartLine } from "react-icons/fa";
+import { FaBook, FaPencilAlt, FaSchool, FaBriefcase, FaChartLine } from "react-icons/fa";
 import { TimelineNavbar } from "../Components";
 
 const Finance = () => {

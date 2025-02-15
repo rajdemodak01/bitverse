@@ -5,11 +5,6 @@ import SelectInput from "./componentsForprofile/SelectInput";
 import Button from "./componentsForprofile/Button";
 import axios from "axios";
 import { useUser } from "@clerk/clerk-react";
-import io from 'socket.io-client';
-const socket = io(import.meta.env.VITE_BACKEND_URL, {
-  transports: ['websocket', 'polling'],
-  withCredentials: true,
-});
 
 
 interface ProfileData {
@@ -40,7 +35,7 @@ const Profile = () => {
   const clerkUserId = user?.id; // This is the Clerk User ID
   const [formStep, setFormStep] = useState(1);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [profileExists, setProfileExists] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -88,7 +83,7 @@ const Profile = () => {
           console.error("Error fetching profile:", error);
         }
       } finally {
-        setLoading(false);
+        // setLoading(false);
       }
     };
 
