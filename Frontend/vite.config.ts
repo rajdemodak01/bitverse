@@ -23,7 +23,8 @@ export default defineConfig({
     // },
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        // target: 'http://localhost:5000',
+        target: 'https://bitverse-bh6u.onrender.com',
         changeOrigin: true,
         secure: false,
       },
