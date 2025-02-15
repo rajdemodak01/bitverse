@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Home from "./Pages/Home"; 
+import Home from "./Pages/Home";
 import Error from "./Pages/Error";
 import Mentors from "./Pages/Mentors";
 import Sessions from "./Pages/Sessions";
@@ -12,7 +12,14 @@ import Sciencelibrary from "./Pages/DashBoard/Sciencelibrary";
 import Timelines from "./Pages/Timeline"; // ✅ Engineering Timeline
 import MedicalTimeline from "./Pages/MedicalTimeline"; // ✅ Medical Timeline
 import BScTimeline from "./Pages/BScTimeline"; // ✅ B.Sc Timeline
-// import StudentCareerQuiz from "./Pages/StudentCareerQuiz"; // ✅ Added Career Quiz
+import Commercelibrary from "./Pages/DashBoard/Commercelibrary"; // ✅ Commerce Library Route
+import Accounting from "./Pages/Accounting";
+import Business from "./Pages/Business";
+import Finance from "./Pages/Finance";
+import Artslibrary from "./Pages/DashBoard/Artslibrary"; // ✅ Arts Library Route
+import FineArts from "./Pages/FineArts"; 
+import Journalism from "./Pages/Journalism";
+import Psychology from "./Pages/Psychology";
 
 const App = () => {
   return (
@@ -36,8 +43,16 @@ const App = () => {
         {/* Science Career Library */}
         <Route path="/career-science" element={<Sciencelibrary />} />
 
-        {/* ✅ Added Career Quiz Route */}
-        {/* <Route path="/career-quiz" element={<StudentCareerQuiz />} /> */}
+        {/* ✅ Commerce Career Library */}
+        <Route path="/career-commerce" element={<Commercelibrary />} />
+        <Route path="/career-commerce/accounting" element={<Accounting />} />
+        <Route path="/career-commerce/finance" element={<Finance />} />
+        <Route path="/career-commerce/business" element={<Business />} />
+
+        <Route path="/career-arts" element={<Artslibrary />} />
+    <Route path="/career-arts/fine-arts" element={<FineArts />} />
+    <Route path="/career-arts/journalism" element={<Journalism />} />
+    <Route path="/career-arts/psychology" element={<Psychology />} />
       </Routes>
     </Router>
   );
