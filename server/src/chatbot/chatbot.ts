@@ -61,15 +61,34 @@ const withMessageHistory = new RunnableWithMessageHistory({
 });
 
 // Function to handle chatbot logic
-export async function handleChat(userInput: string, sessionId: string) { 
-  // Process the user's input using the chatbot model
+import ChatMessage from "../models/ChatMessage.js";
+
+// Function to handle chatbot logic
+export async function handleChat(userInput: string, sessionId: string, userId: string) { 
+  // Fetch previous chat messages for this user
+  const chatHistory = await ChatMessage.find({ userId }).sort({ timestamp: 1 });
+
+  // Format history for LangChain
+  const formattedHistory = chatHistory.map(msg => ({
+    role: msg.sender === "user" ? "human" : "system",
+    content: msg.text,
+  }));
+
+  // Process chatbot response with chat history
   const response = await withMessageHistory.invoke(
-    { input: userInput },
+    { input: userInput, chat_history: formattedHistory },
     { configurable: { sessionId } }
   );
 
+  // Save user message in MongoDB
+  await ChatMessage.create({ userId, sessionId, sender: "user", text: userInput });
+
+  // Save bot response in MongoDB
+  await ChatMessage.create({ userId, sessionId, sender: "bot", text: response.content });
+
   return response.content;
 }
+
 
 // Function to generate a new session ID
 export function createNewSession(): string {  // Return type explicitly declared

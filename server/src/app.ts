@@ -11,6 +11,7 @@ import { handleChat, createNewSession } from "./chatbot/chatbot.js";
 import { connectDB } from "./db/connectDb.js";
 import bodyParser from 'body-parser';
 import { handleWebhook } from "./controllers/webhook.js";
+import ChatMessage from "./models/ChatMessage.js";
 
 // Configuration
 export const envMode = process.env.NODE_ENV?.trim() || "DEVELOPMENT";
@@ -65,23 +66,37 @@ app.get("*", (req, res) => {
 app.use(errorMiddleware);
 
 // Socket.io event handling
-io.on('connection', (socket) => {
-  console.log('User connected');
-  
-  let sessionId = createNewSession();
-  
-  socket.on('userMessage', async (userInput) => {
+io.on("connection", async (socket) => {
+  console.log("User connected");
+
+  socket.on("getPreviousMessages", async (userId) => {
     try {
-      const response = await handleChat(userInput.text, sessionId);
-      socket.emit('botResponse', response);
+      const previousMessages = await ChatMessage.find({ userId }).sort({ timestamp: 1 });
+      socket.emit("previousMessages", previousMessages);
     } catch (error) {
-      console.error('Error handling user message:', error);
+      console.error("Error fetching chat history:", error);
     }
   });
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
+
+  socket.on("userMessage", async ({ text, userId }) => {
+    try {
+      let sessionId = createNewSession(); // Generate sessionId if needed
+
+      // Process message and get bot response
+      const botResponse = await handleChat(text, sessionId, userId);
+
+      // Send bot response to client
+      socket.emit("botResponse", botResponse);
+    } catch (error) {
+      console.error("Error handling user message:", error);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
   });
 });
+
 
 // Start function
 const start = async () => {
