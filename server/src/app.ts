@@ -169,6 +169,7 @@ app.get("/api/bookings/:userId", async (req, res) => {
 });
 
 app.get("*", (req, res) => {
+  console.log("returning from * ");
   if (req.path.startsWith('/socket.io')) return;
   res.status(404).json({
     success: false,
