@@ -13,21 +13,21 @@ export default defineConfig({
   server: {
     open: true,
     cors: true,
-    // proxy: {
-    //   '/leetcode': {
-    //     target: 'https://leetcode.com/graphql',
-    //     changeOrigin: true,
-    //     secure: false,
-    //     rewrite: (path) => path.replace(/^\/leetcode/, '')
-    //   },
-    // },
     proxy: {
-      '/api': {
-        // target: 'http://localhost:5000',
-        target: 'https://bitverse-bh6u.onrender.com',
+      '/leetcode': {
+        target: 'https://leetcode.com/graphql',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/leetcode/, '')
       },
     },
+    // proxy: {
+    //   '/api': {
+    //     // target: 'http://localhost:5000',
+    //     target: 'https://bitverse-bh6u.onrender.com',
+    //     changeOrigin: true,
+    //     secure: false,
+    //   },
+    // },
   },
 });
