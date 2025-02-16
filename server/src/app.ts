@@ -58,10 +58,6 @@ app.post(
   '/api/webhook',bodyParser.raw({ type: 'application/json' }),handleWebhook);
 
 // Define routes
-app.get("/", (req, res) => {
-  res.send("Hello, World!");
-});
-
 
 app.post("/api/profile", async (req, res) => {
   console.log("profile called")
@@ -175,6 +171,9 @@ app.get("*", (req, res) => {
     success: false,
     message: "Page not found",
   });
+});
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
 });
 
 // Error handling middleware

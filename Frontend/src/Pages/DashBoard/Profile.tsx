@@ -70,7 +70,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         console.log(`${clerkUserId}`)
-        const response = await axios.get(`${API_URL}/api/profile/${clerkUserId}`, {
+        const response = await axios.get(`/api/profile/${clerkUserId}`, {
           withCredentials: true,
         });
 

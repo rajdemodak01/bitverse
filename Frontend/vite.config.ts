@@ -20,14 +20,14 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/leetcode/, '')
       },
+        '/api': {
+          // target: 'http://localhost:5000',
+          target: 'https://bitverse-bh6u.onrender.com',
+          changeOrigin: true,
+          secure: false,
+        },
     },
     // proxy: {
-    //   '/api': {
-    //     // target: 'http://localhost:5000',
-    //     target: 'https://bitverse-bh6u.onrender.com',
-    //     changeOrigin: true,
-    //     secure: false,
-    //   },
     // },
   },
 });

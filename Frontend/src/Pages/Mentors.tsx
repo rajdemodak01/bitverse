@@ -70,7 +70,7 @@ const Mentors: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto flex flex-col items-center gap-10 p-4">
+      <div className="w-full min-h-screen flex flex-col items-center gap-10 p-4 bg-gradient-to-r from-green-400 to-yellow-300 " >
         <h1 className="text-2xl font-semibold text-center">Mentor Booking</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
