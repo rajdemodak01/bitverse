@@ -52,20 +52,25 @@ const RegisterForm: React.FC = () => {
                         <input type="text" name="name" placeholder="NAME" onChange={handleChange} className="w-full border border-gray-300 p-3 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500" required />
                         <div className="flex flex-col md:flex-row justify-between gap-4">
                             <input type="number" name="phoneNumber" placeholder="PHONE NUMBER" onChange={handleChange} className="w-full md:w-1/2 border border-gray-300 p-3 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500" required />
-                            <select name="gender" onChange={handleChange} className="w-full md:w-1/2 border border-gray-300 p-3 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500" required>
-                                <option value="">GENDER</option>
-                                <option value="MALE">MALE</option>
-                                <option value="FEMALE">FEMALE</option>
-                                <option value="NON-BINARY">NON-BINARY</option>
-                            </select>
+                            <label htmlFor="role">Select Gender:
+                                <select name="gender" onChange={handleChange} className="w-full md:w-1/2 border border-gray-300 p-3 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="MALE">MALE</option>
+                                    <option value="FEMALE">FEMALE</option>
+                                    <option value="NON-BINARY">NON-BINARY</option>
+                                </select>
+                            </label>
                         </div>
                         <input type="email" name="email" placeholder="EMAIL ADDRESS" onChange={handleChange} className="w-full border border-gray-300 p-3 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500" required />
+                        <label htmlFor="subject">
+                            Subject
                         <select id="subject" name="subject" onChange={handleChange} className="w-full border border-gray-300 p-3 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500" required>
                             <option value="">Choose a subject</option>
                             <option value="Science">Science</option>
                             <option value="Commerce">Commerce</option>
                             <option value="Arts">Arts</option>
                         </select>
+                        </label>
                         <button type="submit" className="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-2xl shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 mt-6">Submit</button>
                     </form>
                 </div>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 // ✅ Define the structure of each question step
 type QuestionStep = {
@@ -71,7 +71,7 @@ const questions = {
 type QuestionKey = keyof typeof questions;
 
 const StudentCareerQuiz: React.FC = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<QuestionKey>("start");
   const [selectedCareer, setSelectedCareer] = useState<string | null>(null);
 
