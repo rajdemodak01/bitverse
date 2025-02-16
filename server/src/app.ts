@@ -128,6 +128,7 @@ app.get("/api/mentors", async (_req, res) => {
 });
 app.post("/api/mentors", async (req, res) => {
   try {
+    console.log("inside api/mentors");
     const { name, profileUrl, about } = req.body;
 
     if (!name || !profileUrl || !about) {

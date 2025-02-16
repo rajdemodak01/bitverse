@@ -25,7 +25,10 @@ const Mentors: React.FC = () => {
   useEffect(() => {
     axios
       .get("/api/mentors") // API endpoint
-      .then((res) => setMentors(res.data))
+      .then((res) => {
+        console.log("API Response:", res.data); // Debugging
+        setMentors(res.data);
+      })
       .catch((err) => console.error("Error fetching mentors:", err));
   }, []);
 
