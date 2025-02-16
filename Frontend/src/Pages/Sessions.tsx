@@ -14,7 +14,7 @@ const RegisterForm: React.FC = () => {
         code: '',
         subject: ''
     });
-    const [submitted, setSubmitted] = useState(false);
+    // const [submitted, setSubmitted] = useState(false);
     const [redirect, setRedirect] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -23,7 +23,7 @@ const RegisterForm: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setSubmitted(true);
+        // setSubmitted(true);
         setTimeout(() => setRedirect(true), 3000);
     };
 
