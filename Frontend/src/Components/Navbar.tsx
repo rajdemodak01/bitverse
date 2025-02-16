@@ -63,7 +63,7 @@ export const Navbar = () => {
               className="ml-2 font-bold text-xl flex gap-2 justify-center items-center"
             >
               <img src="/logo.svg" alt="" className="h-12 w-12" />
-              <h1 className="text-textsecond font-extrabold text-xl">CareerQuest</h1>
+              <h1 className="text-textsecond font-extrabold text-xl">CareerBaba</h1>
             </Link>
           </NavigationMenuItem>
 
